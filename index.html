@@ -3,204 +3,172 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Agenda Pro &bull; Google Calendar</title>
+<title>Agenda Espectacular</title>
 <style>
-:root {
-  --bg: #F8FAFC;
-  --surface: #FFFFFF;
-  --ink: #0F172A;
-  --muted: #64748B;
-  --line: #E2E8F0;
-  --accent: #2563EB;
-  --accent-light: rgba(37, 99, 235, 0.08);
-  --accent-ink: #FFFFFF;
-  --danger: #EF4444;
-  --ok: #10B981;
-  --slot-free: #F0FDF4;
-  --slot-free-border: #DCFCE7;
-  color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0B0F19;
-    --surface: #151F32;
-    --ink: #F1F5F9;
-    --muted: #94A3B8;
-    --line: #1E293B;
-    --accent: #3B82F6;
-    --accent-light: rgba(59, 130, 246, 0.15);
-    --accent-ink: #0F172A;
-    --danger: #F87171;
-    --ok: #34D399;
-    --slot-free: rgba(16, 185, 129, 0.05);
-    --slot-free-border: rgba(16, 185, 129, 0.15);
-    color-scheme: dark;
-  }
-}
-* { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--ink); padding: 24px 16px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-main { width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 24px; }
-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 16px; }
-h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
-.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.03); }
-.btn { font-size: 14px; font-weight: 600; padding: 10px 18px; border-radius: 10px; cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--ink); transition: all 0.2s ease; }
-.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-.btn:hover { opacity: 0.9; transform: translateY(-1px); }
-.input { padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); width: 100%; font-size: 14px; margin-top: 6px; }
-.msg { margin-top: 12px; font-size: 14px; font-weight: 600; text-align: center; padding: 10px; border-radius: 8px; }
-.msg.error { color: var(--danger); background: rgba(239, 68, 68, 0.08); }
-.msg.ok { color: var(--ok); background: rgba(16, 185, 129, 0.08); }
-.msg.warn { color: var(--muted); background: var(--line); }
-.hidden { display: none !important; }
-
-.calendar-grid { display: grid; grid-template-columns: 80px repeat(7, 1fr); background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.02); }
-.grid-header-cell { background: var(--bg); text-align: center; padding: 16px 8px; font-weight: 600; font-size: 14px; border-right: 1px solid var(--line); border-bottom: 2px solid var(--line); }
-.grid-header-cell.time-label { border-right: 2px solid var(--line); display: flex; align-items: center; justify-content: center; color: var(--muted); }
-.time-row-label { grid-column: 1; text-align: right; padding-right: 12px; font-size: 12px; color: var(--muted); font-weight: 700; border-right: 2px solid var(--line); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: flex-end; height: 60px; }
-.calendar-body { grid-column: 2 / span 7; display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(14, 60px); position: relative; background: var(--surface); }
-.grid-cell-bg { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); height: 60px; pointer-events: none; }
-
-.absolute-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: grid; grid-template-columns: repeat(7, 1fr); pointer-events: none; }
-.day-column { position: relative; height: 100%; border-right: 1px solid var(--line); }
-.cal-item { position: absolute; left: 6px; right: 6px; border-radius: 10px; padding: 8px 10px; font-size: 12px; line-height: 1.4; overflow: hidden; display: flex; flex-direction: column; pointer-events: auto; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-.cal-item:hover { transform: translateY(-2px) scale(1.01); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08); z-index: 10; }
-.cal-item.busy { background: var(--accent-light); border-left: 4px solid var(--accent); color: var(--ink); }
-.cal-item.free { background: var(--slot-free); border: 1px solid var(--slot-free-border); border-left: 4px solid var(--ok); color: var(--ink); }
-.title-el { font-weight: 700; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
-.time-el { color: var(--muted); font-size: 11px; font-weight: 600; margin-top: auto; }
-
-@media (max-width: 850px) {
-  .calendar-grid { grid-template-columns: 60px repeat(7, 110px); overflow-x: auto; }
-}
+  :root { --bg: #F8FAFC; --surface: #FFFFFF; --ink: #0F172A; --muted: #64748B; --line: #E2E8F0; --accent: #2563EB; --ok: #10B981; }
+  * { box-sizing: border-box; font-family: system-ui, sans-serif; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--ink); padding: 24px; display: flex; flex-direction: column; align-items: center; }
+  main { width: 100%; max-width: 1100px; display: flex; flex-direction: column; gap: 20px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+  .flex { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+  input { padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font-size: 14px; flex: 1; min-width: 280px; }
+  button { font-size: 14px; font-weight: 600; padding: 10px 16px; border-radius: 8px; cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+  button.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .grid { display: grid; grid-template-columns: 70px repeat(7, 1fr); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .cell { padding: 12px 6px; text-align: center; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); font-size: 13px; min-height: 55px; }
+  .header { background: var(--bg); font-weight: 700; }
+  .time-col { font-weight: 700; color: var(--muted); background: var(--bg); text-align: right; padding-right: 10px; }
+  .event { margin: 2px; padding: 4px 6px; border-radius: 6px; font-size: 11px; font-weight: 600; text-align: left; }
+  .event.busy { background: rgba(37, 99, 235, 0.1); border-left: 3px solid var(--accent); color: var(--ink); }
+  .event.free { background: rgba(16, 185, 129, 0.1); border-left: 3px solid var(--ok); color: var(--ok); }
+  #status { font-weight: 600; font-size: 14px; margin-top: 5px; }
 </style>
 </head>
 <body>
 <main>
-  <header class="card">
-    <div>
-      <h1>Agenda Espectacular Pro</h1>
-      <p style="margin-top: 4px; color: var(--muted); font-size: 14px;">Visualización inmersiva inteligente de tu tiempo</p>
-    </div>
-    <div id="auth-zone">
-      <button id="connectBtn" class="btn primary hidden">Conectar Google Calendar</button>
-      <button id="disconnectBtn" class="btn hidden">Desconectar cuenta</button>
-    </div>
-  </header>
-
-  <div id="globalStatus" class="msg hidden"></div>
-
-  <!-- Formulario de Configuración Inicial -->
-  <section id="setupSection" class="card">
-    <h3 style="margin-bottom: 8px;">Vincular Google Project</h3>
-    <p style="font-size: 14px; color: var(--muted); margin-bottom: 16px;">Para conectar tu calendario, introduce el ID de Cliente OAuth de tu consola de Google Cloud.</p>
-    <label style="font-size: 14px; font-weight: 600; color: var(--ink);">ID de Cliente de Google
-      <input id="cidInput" type="text" class="input" placeholder="123456...apps.googleusercontent.com">
-    </label>
-    <div style="margin-top: 20px;"><button id="saveCidBtn" class="btn primary">Guardar y Vincular Aplicación</button></div>
-  </section>
-
-  <!-- Panel Principal del Calendario -->
-  <section id="appView" class="hidden">
-    <div class="calendar-grid">
-      <div class="grid-header-cell time-label">Hora</div>
-      <div class="grid-header-cell" id="h0">-</div>
-      <div class="grid-header-cell" id="h1">-</div>
-      <div class="grid-header-cell" id="h2">-</div>
-      <div class="grid-header-cell" id="h3">-</div>
-      <div class="grid-header-cell" id="h4">-</div>
-      <div class="grid-header-cell" id="h5">-</div>
-      <div class="grid-header-cell" id="h6">-</div>
-      
-      <div id="hours-sidebar" style="display: contents;"></div>
-      
-      <div class="calendar-body">
-        <div id="grid-canvas" style="display: contents;"></div>
-        <div id="absolute-container" class="absolute-container"></div>
+  <div class="card">
+    <h1 style="font-size: 22px; margin-bottom: 12px;">🗓️ Agenda Espectacular Pro</h1>
+    <div class="flex">
+      <div style="flex: 1;">
+        <label style="font-size: 12px; font-weight: 700; color: var(--muted);">ID DE CLIENTE GOOGLE OAUTH</label>
+        <input id="clientIdInput" type="text" placeholder="Pega aquí el ID gris largo de Google que termina en .apps.googleusercontent.com">
       </div>
+      <button id="connectBtn" class="primary">Conectar Google Calendar</button>
+      <button id="clearBtn">Borrar Memoria</button>
     </div>
-    <div style="margin-top: 24px; text-align: center;">
-      <button id="resetAppBtn" class="btn" style="color: var(--danger); border-color: transparent;">Borrar ID y empezar de cero</button>
+    <div id="status" style="color: var(--accent); margin-top: 10px;">Introduce tu ID de cliente para arrancar.</div>
+  </div>
+
+  <div class="card" style="overflow-x: auto;">
+    <div class="grid" id="calendarGrid">
+      <!-- La rejilla se genera dinámicamente con JavaScript -->
     </div>
-  </section>
+  </div>
 </main>
 
 <script src="https://google.com" async defer></script>
 <script>
-const SCOPE = "https://googleapis.com";
-const $ = id => document.getElementById(id);
-const LS = {
-  get(k) { try { return localStorage.getItem(k); } catch(e) { return null; } },
-  set(k, v) { try { localStorage.setItem(k, v); } catch(e) {} },
-  del(k) { try { localStorage.removeItem(k); } catch(e) {} }
-};
+  const $ = id => document.getElementById(id);
+  const START_H = 8, END_H = 20; // Rango de horas visible
+  let days = [];
 
-let clientId = LS.get("agenda_cid") || "";
-let token = LS.get("agenda_token") || "";
-let tokenExp = parseInt(LS.get("agenda_token_exp") || "0", 10);
-let daysData = [];
+  // 1. Generar días de la semana actual
+  function buildHeader() {
+    const grid = $("calendarGrid");
+    grid.innerHTML = '<div class="cell header">Hora</div>';
+    days = [];
+    const today = new Date();
+    today.setHours(0,0,0,0);
 
-const START_HOUR = 8;
-const END_HOUR = 22;
-const HOUR_HEIGHT = 60;
-
-function notify(text, type) {
-  const e = $("globalStatus");
-  if (!text) { e.classList.add("hidden"); return; }
-  e.textContent = text;
-  e.className = "msg" + (type ? " " + type : "");
-  e.classList.remove("hidden");
-}
-
-function initStructure() {
-  const sidebar = $("hours-sidebar");
-  const canvas = $("grid-canvas");
-  sidebar.innerHTML = "";
-  canvas.innerHTML = "";
-  
-  for (let h = START_HOUR; h < END_HOUR; h++) {
-    const label = document.createElement("div");
-    label.className = "time-row-label";
-    label.textContent = `${String(h).padStart(2, '0')}:00`;
-    sidebar.appendChild(label);
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      days.push(d);
+      
+      const label = document.createElement("div");
+      label.className = "cell header";
+      label.innerHTML = `<div>${d.toLocaleDateString("es-ES", {weekday: 'short'})}</div><div style="color:var(--accent); font-size:15px;">${d.getDate()}</div>`;
+      grid.appendChild(label);
+    }
     
-    for (let d = 0; d < 7; d++) {
-      const cell = document.createElement("div");
-      cell.className = "grid-cell-bg";
-      canvas.appendChild(cell);
+    // Generar las filas vacías de horas
+    for (let h = START_H; h <= END_H; h++) {
+      const timeLabel = document.createElement("div");
+      timeLabel.className = "cell time-col";
+      timeLabel.textContent = `${h}:00`;
+      grid.appendChild(timeLabel);
+
+      for (let d = 0; d < 7; d++) {
+        const slot = document.createElement("div");
+        slot.className = "cell";
+        slot.id = `cell-${d}-${h}`;
+        grid.appendChild(slot);
+      }
     }
   }
-}
 
-function calculateWeekDays() {
-  daysData = [];
-  const start = new Date();
-  start.setHours(0,0,0,0);
-  
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(start);
-    d.setDate(start.getDate() + i);
-    daysData.push(d);
-    
-    const hEl = $(`h${i}`);
-    if (hEl) {
-      hEl.innerHTML = `<div style="font-weight: 800; color: var(--accent); font-size: 16px;">${d.toLocaleDateString("es-ES", {day: 'numeric'})}</div>
-                       <div style="font-size: 10px; color: var(--muted); text-transform: uppercase; font-weight: 700; margin-top: 2px;">${d.toLocaleDateString("es-ES", {weekday: 'short'})}</div>`;
+  // 2. Cargar credenciales guardadas si existen
+  if (localStorage.getItem("saved_cid")) {
+    $("clientIdInput").value = localStorage.getItem("saved_cid");
+    $("status").textContent = "ID cargado de la memoria. Pulsa 'Conectar Google Calendar'.";
+    $("status").style.color = "var(--ok)";
+  }
+
+  // 3. Acción del botón Conectar
+  $("connectBtn").onclick = () => {
+    const cid = $("clientIdInput").value.trim();
+    if (!cid) return alert("Por favor, introduce primero tu ID largo de Google.");
+    localStorage.setItem("saved_cid", cid);
+
+    if (!window.google || !google.accounts) return alert("La librería de Google está cargando. Espera 2 segundos y pulsa de nuevo.");
+
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: cid,
+      scope: "https://googleapis.com",
+      ux_mode: "popup",
+      callback: (res) => {
+        if (res.error) {
+          $("status").textContent = "Error: " + res.error;
+          $("status").style.color = "red";
+          return;
+        }
+        $("status").textContent = "¡Conectado! Sincronizando citas...";
+        $("status").style.color = "var(--ok)";
+        fetchEvents(res.access_token);
+      }
+    });
+    client.requestAccessToken({ prompt: "consent" });
+  };
+
+  // 4. Descargar citas y rellenar la tabla de manera directa
+  async function fetchEvents(token) {
+    const timeMin = days[0].toISOString();
+    const timeMax = new Date(days[6].getTime() + 24*60*60*1000).toISOString();
+
+    try {
+      const res = await fetch(`https://googleapis.com{timeMin}&timeMax=${timeMax}&singleEvents=true`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      
+      // Rellenar espacios vacíos por defecto con verde
+      for (let h = START_H; h <= END_H; h++) {
+        for (let d = 0; d < 7; d++) {
+          const block = $(`cell-${d}-${h}`);
+          block.innerHTML = '<div class="event free">Disponible</div>';
+        }
+      }
+
+      // Sobrescribir tramos ocupados con azul
+      if (data.items) {
+        data.items.forEach(ev => {
+          const start = new Date(ev.start.dateTime || ev.start.date);
+          const dayIdx = days.findIndex(d => d.getDate() === start.getDate() && d.getMonth() === start.getMonth());
+          
+          if (dayIdx !== -1) {
+            const hour = start.getHours();
+            if (hour >= START_H && hour <= END_H) {
+              const block = $(`cell-${dayIdx}-${hour}`);
+              if (block) {
+                block.innerHTML = `<div class="event busy" title="${ev.summary || 'Ocupado'}">${ev.summary || 'Cita Ocupada'}</div>`;
+              }
+            }
+          }
+        });
+      }
+      $("status").textContent = "Calendario sincronizado correctamente.";
+    } catch (e) {
+      $("status").textContent = "Error de red al leer Calendar.";
+      $("status").style.color = "red";
     }
   }
-}
 
-function renderState() {
-  if (!clientId || clientId.trim() === "") {
-    $("setupSection").classList.remove("hidden");
-    $("appView").classList.add("hidden");
-    $("connectBtn").classList.add("hidden");
-    $("disconnectBtn").classList.add("hidden");
-    notify("Introduce tu ID de Cliente de Google para configurar la agenda.", "warn");
-  } else if (!token || Date.now() > tokenExp) {
-    $("setupSection").classList.add("hidden");
-    $("appView").classList.add("hidden");
-    $("connectBtn").classList.remove("hidden");
-    $("disconnectBtn").classList.add("hidden");
-    notify("ID vinculado correctamente. Haz clic arriba en 'Conectar Google Calendar'.", "ok");
-  } else {
-    $("setupSection").classList.add("hidden");
+  $("clearBtn").onclick = () => {
+    localStorage.clear();
+    location.reload();
+  };
+
+  buildHeader();
+</script>
+</body>
+</html>
