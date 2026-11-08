@@ -89,8 +89,8 @@ h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
 
   <div id="globalStatus" class="msg hidden"></div>
 
-  <!-- Formulario de Configuración Inicial -->
-  <section id="setupSection" class="card hidden">
+  <!-- Formulario de Configuración Inicial siempre visible si no se ha guardado nada -->
+  <section id="setupSection" class="card">
     <h3 style="margin-bottom: 8px;">Vincular Google Project</h3>
     <p style="font-size: 14px; color: var(--muted); margin-bottom: 16px;">Para conectar tu calendario, introduce el ID de Cliente OAuth de tu consola de Google Cloud.</p>
     <label style="font-size: 14px; font-weight: 600; color: var(--ink);">ID de Cliente de Google
@@ -204,4 +204,3 @@ function renderState() {
     notify("ID vinculado. Haz clic en 'Conectar Google Calendar'.", "ok");
   } else {
     $("setupSection").classList.add("hidden");
-    $("appView").classList.remove("hidden");
