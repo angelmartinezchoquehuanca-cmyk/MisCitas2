@@ -51,7 +51,7 @@ h1 { font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
 .msg.error { color: var(--danger); }.msg.ok { color: var(--ok); }
 .hidden { display: none !important; }
 
-/* REJILLA AVANZADA INTERACTIVA */
+/* REJILLA INTERACTIVA */
 .calendar-wrapper { display: flex; flex-direction: column; gap: 16px; }
 .calendar-grid { display: grid; grid-template-columns: 80px repeat(7, 1fr); background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.02); }
 .grid-header-cell { background: var(--bg); text-align: center; padding: 14px 8px; font-weight: 600; font-size: 14px; border-right: 1px solid var(--line); border-bottom: 2px solid var(--line); }
@@ -71,7 +71,7 @@ h1 { font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
 .item-time { color: var(--muted); font-size: 10px; font-weight: 500; margin-top: 2px; }
 
 @media (max-width: 768px) {
-  .calendar-grid { grid-template-columns: 60px repeat(7, 85px); overflow-x: auto; }
+  .calendar-grid { grid-template-columns: 60px repeat(7, 95px); overflow-x: auto; }
 }
 </style>
 </head>
@@ -109,13 +109,10 @@ h1 { font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
         <div class="grid-header-cell" id="h5">-</div>
         <div class="grid-header-cell" id="h6">-</div>
         
-        <!-- Fila de Horas fijas de 8:00 a 22:00 -->
         <div id="hours-sidebar" style="display: contents;"></div>
         
         <div class="calendar-body">
-          <!-- Fondo de celdas estáticas de la rejilla -->
           <div id="grid-canvas" style="display: contents;"></div>
-          <!-- Contenedor flotante interactivo real -->
           <div id="absolute-container" class="absolute-container"></div>
         </div>
       </div>
@@ -138,7 +135,6 @@ let token = LS.get("agenda_token") || "";
 let tokenExp = parseInt(LS.get("agenda_token_exp") || "0", 10);
 let daysData = [];
 
-// Generar estructura base de horas (08:00 a 21:00)
 const START_HOUR = 8;
 const END_HOUR = 22;
 
@@ -213,7 +209,7 @@ $("disconnectBtn").onclick = () => {
 };
 
 $("connectBtn").onclick = () => {
-  if (!window.google || !google.accounts) return alert("Cargando servicios de Google, espera un segundo e inténtalo de nuevo.");
+  if (!window.google || !google.accounts) return alert("Cargando servicios de Google, espera un segundo.");
   
   const client = google.accounts.oauth2.initTokenClient({
     client_id: clientId,
@@ -227,3 +223,13 @@ $("connectBtn").onclick = () => {
       renderState();
     }
   });
+  client.requestAccessToken();
+};
+
+async function fetchCalendarData() {
+  const container = $("absolute-container");
+  container.innerHTML = "";
+  
+  const columns = [];
+  for (let i = 0; i < 7; i++) {
+    const col = document.createElement("div");
