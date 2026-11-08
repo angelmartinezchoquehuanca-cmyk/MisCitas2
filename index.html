@@ -41,7 +41,7 @@
 
   <div class="card" style="overflow-x: auto;">
     <div class="grid" id="calendarGrid">
-      <!-- La rejilla se genera dinámicamente -->
+      <!-- La rejilla se genera aquí -->
     </div>
   </div>
 </main>
@@ -85,11 +85,19 @@
     }
   }
 
-  // Cargar si ya estaba guardado
   if (localStorage.getItem("saved_cid")) {
     $("clientIdInput").value = localStorage.getItem("saved_cid");
     $("status").textContent = "ID cargado de la memoria. Pulsa 'Conectar Google Calendar'.";
     $("status").style.color = "var(--ok)";
+  }
+
+  // Generar la rejilla con los tramos disponibles vacíos por defecto
+  buildHeader();
+  for (let h = START_H; h <= END_H; h++) {
+    for (let d = 0; d < 7; d++) {
+      const block = $(`cell-${d}-${h}`);
+      if (block) block.innerHTML = '<div class="event free">Disponible</div>';
+    }
   }
 
   $("connectBtn").onclick = () => {
@@ -98,7 +106,7 @@
     localStorage.setItem("saved_cid", cid);
 
     if (!window.google || !google.accounts || !google.accounts.oauth2) {
-      return alert("Los servicios de Google aún se están cargando en segundo plano. Espera 3 segundos y vuelve a pulsar.");
+      return alert("Los servicios de Google aún se están inicializando. Espera 2 segundos y pulsa de nuevo.");
     }
 
     const client = google.accounts.oauth2.initTokenClient({
@@ -120,25 +128,17 @@
   };
 
   async function fetchEvents(token) {
-    // Corregido: Extremos de fecha calculados correctamente desde el primer y último día del array
+    // CORREGIDO: Extraemos las fechas de los extremos correctos del array individualmente
     const timeMin = days[0].toISOString();
-    const timeMax = new Date(days[6].getTime() + 24 * 60 * 60 * 1000).toISOString();
+    const nextDay = new Date(days[6].getTime() + 24 * 60 * 60 * 1000);
+    const timeMax = nextDay.toISOString();
 
     try {
       const res = await fetch(`https://googleapis.com{timeMin}&timeMax=${timeMax}&singleEvents=true`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      
-      // Rellenar vacíos con verde
-      for (let h = START_H; h <= END_H; h++) {
-        for (let d = 0; d < 7; d++) {
-          const block = $(`cell-${d}-${h}`);
-          if (block) block.innerHTML = '<div class="event free">Disponible</div>';
-        }
-      }
 
-      // Reemplazar ocupados con azul
       if (data.items) {
         data.items.forEach(ev => {
           const start = new Date(ev.start.dateTime || ev.start.date);
@@ -166,8 +166,6 @@
     localStorage.clear();
     location.reload();
   };
-
-  buildHeader();
 </script>
 </body>
 </html>
