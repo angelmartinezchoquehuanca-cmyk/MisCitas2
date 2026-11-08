@@ -47,7 +47,7 @@ h1 { font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
 .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .btn:hover { opacity: 0.9; transform: translateY(-1px); }
 .input { padding: 10px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); width: 100%; font-size: 14px; }
-.msg { margin: 12px 0 0; font-size: 14px; font-weight: 500; }
+.msg { margin: 12px 0 0; font-size: 14px; font-weight: 500; text-align: center; }
 .msg.error { color: var(--danger); }.msg.ok { color: var(--ok); }
 .hidden { display: none !important; }
 
@@ -84,17 +84,20 @@ h1 { font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
     </div>
     <div id="auth-zone">
       <button id="connectBtn" class="btn primary hidden">Conectar Google Calendar</button>
-      <button id="disconnectBtn" class="btn hidden">Desconectar</button>
+      <button id="disconnectBtn" class="btn hidden">Desconectar cuenta</button>
     </div>
   </header>
 
+  <p id="globalStatus" class="msg"></p>
+
   <section id="setupSection" class="card hidden">
-    <h3 style="margin-top:0">Configuración Inicial</h3>
-    <label style="display:grid; gap:6px; font-size:14px; font-weight:500;">ID de Cliente de Google (OAuth Client ID)
+    <h3 style="margin-top:0">Configuración del Client ID</h3>
+    <label style="display:grid; gap:6px; font-size:14px; font-weight:500;">Introduce tu ID de Cliente de Google
       <input id="cidInput" type="text" class="input" placeholder="123456...apps.googleusercontent.com">
     </label>
-    <div style="margin-top:14px;"><button id="saveCidBtn" class="btn primary">Vincular Aplicación</button></div>
-    <p id="setupMsg" class="msg"></p>
+    <div style="margin-top:14px; display: flex; gap: 8px;">
+      <button id="saveCidBtn" class="btn primary">Vincular Aplicación</button>
+    </div>
   </section>
 
   <section id="appView" class="hidden">
@@ -117,6 +120,9 @@ h1 { font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
         </div>
       </div>
     </div>
+    <div style="margin-top: 15px; text-align: center;">
+      <button id="resetAppBtn" class="btn text-danger" style="color: var(--danger)">Borrar ID y empezar de cero</button>
+    </div>
   </section>
 </main>
 
@@ -125,9 +131,9 @@ h1 { font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
 const SCOPE = "https://googleapis.com";
 const $ = id => document.getElementById(id);
 const LS = {
-  get(k) { return localStorage.getItem(k); },
-  set(k, v) { localStorage.setItem(k, v); },
-  del(k) { localStorage.removeItem(k); }
+  get(k) { try { return localStorage.getItem(k); } catch(e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch(e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch(e) {} }
 };
 
 let clientId = LS.get("agenda_cid") || "";
@@ -137,6 +143,12 @@ let daysData = [];
 
 const START_HOUR = 8;
 const END_HOUR = 22;
+
+function notify(text, type) {
+  const e = $("globalStatus");
+  e.textContent = text || "";
+  e.className = "msg" + (type ? " " + type : "");
+}
 
 function initStructure() {
   const sidebar = $("hours-sidebar");
@@ -168,34 +180,41 @@ function calculateWeekDays() {
     d.setDate(start.getDate() + i);
     daysData.push(d);
     
-    $(`h${i}`).innerHTML = `<div style="font-weight:700; color:var(--accent);">${d.toLocaleDateString("es-ES", {day: 'numeric'})}</div>
-                            <div style="font-size:11px; color:var(--muted); text-transform:uppercase;">${d.toLocaleDateString("es-ES", {weekday: 'short'})}</div>`;
+    const hEl = $(`h${i}`);
+    if (hEl) {
+      hEl.innerHTML = `<div style="font-weight:700; color:var(--accent);">${d.toLocaleDateString("es-ES", {day: 'numeric'})}</div>
+                       <div style="font-size:11px; color:var(--muted); text-transform:uppercase;">${d.toLocaleDateString("es-ES", {weekday: 'short'})}</div>`;
+    }
   }
 }
 
 function renderState() {
-  if (!clientId) {
+  // Asegurar visualización explícita si los campos están vacíos
+  if (!clientId || clientId.trim() === "") {
     $("setupSection").classList.remove("hidden");
     $("appView").classList.add("hidden");
     $("connectBtn").classList.add("hidden");
     $("disconnectBtn").classList.add("hidden");
+    notify("Introduce tu ID de Cliente de Google arriba para empezar.", "warn");
   } else if (!token || Date.now() > tokenExp) {
     $("setupSection").classList.add("hidden");
     $("appView").classList.add("hidden");
     $("connectBtn").classList.remove("hidden");
     $("disconnectBtn").classList.add("hidden");
+    notify("ID de cliente cargado. Pulsa en 'Conectar Google Calendar' para sincronizar tus citas.", "ok");
   } else {
     $("setupSection").classList.add("hidden");
     $("appView").classList.remove("hidden");
     $("connectBtn").classList.add("hidden");
     $("disconnectBtn").classList.remove("hidden");
+    notify("Cargando tu calendario...", "ok");
     fetchCalendarData();
   }
 }
 
 $("saveCidBtn").onclick = () => {
   const val = $("cidInput").value.trim();
-  if (!val) return;
+  if (!val) return alert("Por favor, introduce un ID válido.");
   clientId = val;
   LS.set("agenda_cid", val);
   renderState();
@@ -204,32 +223,3 @@ $("saveCidBtn").onclick = () => {
 $("disconnectBtn").onclick = () => {
   LS.del("agenda_token");
   LS.del("agenda_token_exp");
-  token = "";
-  renderState();
-};
-
-$("connectBtn").onclick = () => {
-  if (!window.google || !google.accounts) return alert("Cargando servicios de Google, espera un segundo.");
-  
-  const client = google.accounts.oauth2.initTokenClient({
-    client_id: clientId,
-    scope: SCOPE,
-    callback: (response) => {
-      if (response.error) return alert("Error de autenticación: " + response.error);
-      token = response.access_token;
-      tokenExp = Date.now() + (parseInt(response.expires_in, 10) * 1000);
-      LS.set("agenda_token", token);
-      LS.set("agenda_token_exp", tokenExp);
-      renderState();
-    }
-  });
-  client.requestAccessToken();
-};
-
-async function fetchCalendarData() {
-  const container = $("absolute-container");
-  container.innerHTML = "";
-  
-  const columns = [];
-  for (let i = 0; i < 7; i++) {
-    const col = document.createElement("div");
