@@ -41,18 +41,18 @@
 
   <div class="card" style="overflow-x: auto;">
     <div class="grid" id="calendarGrid">
-      <!-- La rejilla se genera dinámicamente con JavaScript -->
+      <!-- La rejilla se genera dinámicamente -->
     </div>
   </div>
 </main>
 
-<script src="https://google.com" async defer></script>
+<!-- Corregido: Cargamos la librería de Google de forma obligatoria antes de ejecutar el script -->
+<script src="https://google.com"></script>
 <script>
   const $ = id => document.getElementById(id);
-  const START_H = 8, END_H = 20; // Rango de horas visible
+  const START_H = 8, END_H = 20; 
   let days = [];
 
-  // 1. Generar días de la semana actual
   function buildHeader() {
     const grid = $("calendarGrid");
     grid.innerHTML = '<div class="cell header">Hora</div>';
@@ -71,7 +71,6 @@
       grid.appendChild(label);
     }
     
-    // Generar las filas vacías de horas
     for (let h = START_H; h <= END_H; h++) {
       const timeLabel = document.createElement("div");
       timeLabel.className = "cell time-col";
@@ -87,21 +86,18 @@
     }
   }
 
-  // 2. Cargar credenciales guardadas si existen
   if (localStorage.getItem("saved_cid")) {
     $("clientIdInput").value = localStorage.getItem("saved_cid");
     $("status").textContent = "ID cargado de la memoria. Pulsa 'Conectar Google Calendar'.";
     $("status").style.color = "var(--ok)";
   }
 
-  // 3. Acción del botón Conectar
   $("connectBtn").onclick = () => {
     const cid = $("clientIdInput").value.trim();
     if (!cid) return alert("Por favor, introduce primero tu ID largo de Google.");
     localStorage.setItem("saved_cid", cid);
 
-    if (!window.google || !google.accounts) return alert("La librería de Google está cargando. Espera 2 segundos y pulsa de nuevo.");
-
+    // Quitamos la comprobación antigua que bloqueaba el botón
     const client = google.accounts.oauth2.initTokenClient({
       client_id: cid,
       scope: "https://googleapis.com",
@@ -120,7 +116,6 @@
     client.requestAccessToken({ prompt: "consent" });
   };
 
-  // 4. Descargar citas y rellenar la tabla de manera directa
   async function fetchEvents(token) {
     const timeMin = days[0].toISOString();
     const timeMax = new Date(days[6].getTime() + 24*60*60*1000).toISOString();
@@ -131,15 +126,13 @@
       });
       const data = await res.json();
       
-      // Rellenar espacios vacíos por defecto con verde
-      for (let h = START_H; h <= END_H; h++) {
+      for (let h = START_HOUR = 8; h <= END_H; h++) {
         for (let d = 0; d < 7; d++) {
           const block = $(`cell-${d}-${h}`);
-          block.innerHTML = '<div class="event free">Disponible</div>';
+          if (block) block.innerHTML = '<div class="event free">Disponible</div>';
         }
       }
 
-      // Sobrescribir tramos ocupados con azul
       if (data.items) {
         data.items.forEach(ev => {
           const start = new Date(ev.start.dateTime || ev.start.date);
@@ -158,7 +151,7 @@
       }
       $("status").textContent = "Calendario sincronizado correctamente.";
     } catch (e) {
-      $("status").textContent = "Error de red al leer Calendar.";
+      $("status").textContent = "Error al descargar los eventos de Google.";
       $("status").style.color = "red";
     }
   }
