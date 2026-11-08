@@ -46,7 +46,6 @@
   </div>
 </main>
 
-<!-- Corregido: Cargamos la librería de Google de forma obligatoria antes de ejecutar el script -->
 <script src="https://google.com"></script>
 <script>
   const $ = id => document.getElementById(id);
@@ -97,7 +96,6 @@
     if (!cid) return alert("Por favor, introduce primero tu ID largo de Google.");
     localStorage.setItem("saved_cid", cid);
 
-    // Quitamos la comprobación antigua que bloqueaba el botón
     const client = google.accounts.oauth2.initTokenClient({
       client_id: cid,
       scope: "https://googleapis.com",
@@ -126,7 +124,7 @@
       });
       const data = await res.json();
       
-      for (let h = START_HOUR = 8; h <= END_H; h++) {
+      for (let h = START_H; h <= END_H; h++) {
         for (let d = 0; d < 7; d++) {
           const block = $(`cell-${d}-${h}`);
           if (block) block.innerHTML = '<div class="event free">Disponible</div>';
