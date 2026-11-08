@@ -53,7 +53,7 @@ h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
 .msg.warn { color: var(--muted); background: var(--line); }
 .hidden { display: none !important; }
 
-/* CALENDARIO PREMIUM */
+/* REJILLA VISUAL */
 .calendar-grid { display: grid; grid-template-columns: 80px repeat(7, 1fr); background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.02); }
 .grid-header-cell { background: var(--bg); text-align: center; padding: 16px 8px; font-weight: 600; font-size: 14px; border-right: 1px solid var(--line); border-bottom: 2px solid var(--line); }
 .grid-header-cell.time-label { border-right: 2px solid var(--line); display: flex; align-items: center; justify-content: center; color: var(--muted); }
@@ -90,7 +90,7 @@ h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
 
   <div id="globalStatus" class="msg hidden"></div>
 
-  <!-- Formulario de Configuración Inicial (Visible si no hay ID) -->
+  <!-- Formulario de Configuración Inicial -->
   <section id="setupSection" class="card hidden">
     <h3 style="margin-bottom: 8px;">Vincular Google Project</h3>
     <p style="font-size: 14px; color: var(--muted); margin-bottom: 16px;">Para conectar tu calendario, introduce el ID de Cliente OAuth de tu consola de Google Cloud.</p>
@@ -142,7 +142,7 @@ let daysData = [];
 
 const START_HOUR = 8;
 const END_HOUR = 22;
-const HOUR_HEIGHT = 60; // Cada hora mide 60px de alto en CSS
+const HOUR_HEIGHT = 60;
 
 function notify(text, type) {
   const e = $("globalStatus");
@@ -196,11 +196,12 @@ function renderState() {
     $("appView").classList.add("hidden");
     $("connectBtn").classList.add("hidden");
     $("disconnectBtn").classList.add("hidden");
-    notify("Configuración requerida: Guarda tu Client ID para activar el sistema.", "warn");
+    notify("Introduce tu ID de Cliente de Google para configurar la agenda.", "warn");
   } else if (!token || Date.now() > tokenExp) {
     $("setupSection").classList.add("hidden");
     $("appView").classList.add("hidden");
     $("connectBtn").classList.remove("hidden");
     $("disconnectBtn").classList.add("hidden");
-    notify("Listo para conectar. Haz clic en 'Conectar Google Calendar'.", "ok");
+    notify("ID vinculado. Haz clic en 'Conectar Google Calendar'.", "ok");
   } else {
+    $("setupSection").classList.add("hidden");
