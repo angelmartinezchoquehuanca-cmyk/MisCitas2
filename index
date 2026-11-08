@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agenda Pro &bull; Google Calendar</title>
+<style>
+:root {
+  --bg: #F8FAFC;
+  --surface: #FFFFFF;
+  --ink: #0F172A;
+  --muted: #64748B;
+  --line: #E2E8F0;
+  --accent: #2563EB;
+  --accent-light: rgba(37, 99, 235, 0.08);
+  --accent-ink: #FFFFFF;
+  --danger: #EF4444;
+  --ok: #10B981;
+  --slot-free: #F0FDF4;
+  --slot-free-border: #DCFCE7;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0B0F19;
+    --surface: #151F32;
+    --ink: #F1F5F9;
+    --muted: #94A3B8;
+    --line: #1E293B;
+    --accent: #3B82F6;
+    --accent-light: rgba(59, 130, 246, 0.15);
+    --accent-ink: #0F172A;
+    --danger: #F87171;
+    --ok: #34D399;
+    --slot-free: rgba(16, 185, 129, 0.05);
+    --slot-free-border: rgba(16, 185, 129, 0.15);
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+body { margin: 0; background: var(--bg); color: var(--ink); padding: 24px 16px; display: flex; flex-direction: column; align-items: center; }
+main { width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 24px; }
+header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 16px; }
+h1 { font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+.btn { font-size: 14px; font-weight: 600; padding: 10px 16px; border-radius: 10px; cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--ink); transition: all 0.2s ease; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.input { padding: 10px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); width: 100%; font-size: 14px; }
+.msg { margin: 12px 0 0; font-size: 14px; font-weight: 500; }
+.msg.error { color: var(--danger); }.msg.ok { color: var(--ok); }
+.hidden { display: none !important; }
+
+/* REJILLA AVANZADA INTERACTIVA */
+.calendar-wrapper { display: flex; flex-direction: column; gap: 16px; }
+.calendar-grid { display: grid; grid-template-columns: 80px repeat(7, 1fr); background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.02); }
+.grid-header-cell { background: var(--bg); text-align: center; padding: 14px 8px; font-weight: 600; font-size: 14px; border-right: 1px solid var(--line); border-bottom: 2px solid var(--line); }
+.grid-header-cell.time-label { border-right: 2px solid var(--line); }
+.time-row-label { grid-column: 1; text-align: right; padding-right: 12px; font-size: 12px; color: var(--muted); font-weight: 600; border-right: 2px solid var(--line); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: flex-end; height: 50px; }
+.calendar-body { grid-column: 2 / span 7; display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(14, 50px); position: relative; background: var(--surface); }
+.grid-cell-bg { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); height: 50px; pointer-events: none; }
+
+/* EVENTOS Y HUECOS */
+.absolute-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: grid; grid-template-columns: repeat(7, 1fr); pointer-events: none; }
+.day-column { position: relative; height: 100%; border-right: 1px solid var(--line); }
+.cal-item { position: absolute; left: 4px; right: 4px; border-radius: 8px; padding: 6px 8px; font-size: 12px; line-height: 1.3; overflow: hidden; display: flex; flex-direction: column; pointer-events: auto; transition: transform 0.15s ease, box-shadow 0.15s ease; cursor: pointer; }
+.cal-item:hover { transform: scale(1.02); box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 10; }
+.cal-item.busy { background: var(--accent-light); border-left: 4px solid var(--accent); color: var(--ink); }
+.cal-item.free { background: var(--slot-free); border: 1px solid var(--slot-free-border); border-left: 4px solid var(--ok); color: var(--ink); }
+.item-title { font-weight: 700; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+.item-time { color: var(--muted); font-size: 10px; font-weight: 500; margin-top: 2px; }
+
+@media (max-width: 768px) {
+  .calendar-grid { grid-template-columns: 60px repeat(7, 85px); overflow-x: auto; }
+}
+</style>
+</head>
+<body>
+<main>
+  <header class="card">
+    <div>
+      <h1>Agenda Espectacular Pro</h1>
+      <p style="margin: 4px 0 0; color: var(--muted); font-size: 14px;">Vista inmersiva de huecos libres y ocupados</p>
+    </div>
+    <div id="auth-zone">
+      <button id="connectBtn" class="btn primary hidden">Conectar Google Calendar</button>
+      <button id="disconnectBtn" class="btn hidden">Desconectar</button>
+    </div>
+  </header>
+
+  <section id="setupSection" class="card hidden">
+    <h3 style="margin-top:0">Configuración Inicial</h3>
+    <label style="display:grid; gap:6px; font-size:14px; font-weight:500;">ID de Cliente de Google (OAuth Client ID)
+      <input id="cidInput" type="text" class="input" placeholder="123456...apps.googleusercontent.com">
+    </label>
+    <div style="margin-top:14px;"><button id="saveCidBtn" class="btn primary">Vincular Aplicación</button></div>
+    <p id="setupMsg" class="msg"></p>
+  </section>
+
+  <section id="appView" class="hidden">
+    <div class="calendar-wrapper">
+      <div class="calendar-grid">
+        <div class="grid-header-cell time-label">Hora</div>
+        <div class="grid-header-cell" id="h0">-</div>
+        <div class="grid-header-cell" id="h1">-</div>
+        <div class="grid-header-cell" id="h2">-</div>
+        <div class="grid-header-cell" id="h3">-</div>
+        <div class="grid-header-cell" id="h4">-</div>
+        <div class="grid-header-cell" id="h5">-</div>
+        <div class="grid-header-cell" id="h6">-</div>
+        
+        <!-- Fila de Horas fijas de 8:00 a 22:00 -->
+        <div id="hours-sidebar" style="display: contents;"></div>
+        
+        <div class="calendar-body">
+          <!-- Fondo de celdas estáticas de la rejilla -->
+          <div id="grid-canvas" style="display: contents;"></div>
+          <!-- Contenedor flotante interactivo real -->
+          <div id="absolute-container" class="absolute-container"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="https://google.com" async defer></script>
+<script>
+const SCOPE = "https://googleapis.com";
+const $ = id => document.getElementById(id);
+const LS = {
+  get(k) { return localStorage.getItem(k); },
+  set(k, v) { localStorage.setItem(k, v); },
+  del(k) { localStorage.removeItem(k); }
+};
+
+let clientId = LS.get("agenda_cid") || "";
+let token = LS.get("agenda_token") || "";
+let tokenExp = parseInt(LS.get("agenda_token_exp") || "0", 10);
+let daysData = [];
+
+// Generar estructura base de horas (08:00 a 21:00)
+const START_HOUR = 8;
+const END_HOUR = 22;
+
+function initStructure() {
+  const sidebar = $("hours-sidebar");
+  const canvas = $("grid-canvas");
+  sidebar.innerHTML = "";
+  canvas.innerHTML = "";
+  
+  for (let h = START_HOUR; h < END_HOUR; h++) {
+    const label = document.createElement("div");
+    label.className = "time-row-label";
+    label.textContent = `${String(h).padStart(2, '0')}:00`;
+    sidebar.appendChild(label);
+    
+    for (let d = 0; d < 7; d++) {
+      const cell = document.createElement("div");
+      cell.className = "grid-cell-bg";
+      canvas.appendChild(cell);
+    }
+  }
+}
+
+function calculateWeekDays() {
+  daysData = [];
+  const start = new Date();
+  start.setHours(0,0,0,0);
+  
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    daysData.push(d);
+    
+    $(`h${i}`).innerHTML = `<div style="font-weight:700; color:var(--accent);">${d.toLocaleDateString("es-ES", {day: 'numeric'})}</div>
+                            <div style="font-size:11px; color:var(--muted); text-transform:uppercase;">${d.toLocaleDateString("es-ES", {weekday: 'short'})}</div>`;
+  }
+}
+
+function renderState() {
+  if (!clientId) {
+    $("setupSection").classList.remove("hidden");
+    $("appView").classList.add("hidden");
+    $("connectBtn").classList.add("hidden");
+    $("disconnectBtn").classList.add("hidden");
+  } else if (!token || Date.now() > tokenExp) {
+    $("setupSection").classList.add("hidden");
+    $("appView").classList.add("hidden");
+    $("connectBtn").classList.remove("hidden");
+    $("disconnectBtn").classList.add("hidden");
+  } else {
+    $("setupSection").classList.add("hidden");
+    $("appView").classList.remove("hidden");
+    $("connectBtn").classList.add("hidden");
+    $("disconnectBtn").classList.remove("hidden");
+    fetchCalendarData();
+  }
+}
+
+$("saveCidBtn").onclick = () => {
+  const val = $("cidInput").value.trim();
+  if (!val) return;
+  clientId = val;
+  LS.set("agenda_cid", val);
+  renderState();
+};
+
+$("disconnectBtn").onclick = () => {
+  LS.del("agenda_token");
+  LS.del("agenda_token_exp");
+  token = "";
+  renderState();
+};
+
+$("connectBtn").onclick = () => {
+  if (!window.google || !google.accounts) return alert("Cargando servicios de Google, espera un segundo e inténtalo de nuevo.");
+  
+  const client = google.accounts.oauth2.initTokenClient({
+    client_id: clientId,
+    scope: SCOPE,
+    callback: (response) => {
+      if (response.error) return alert("Error de autenticación: " + response.error);
+      token = response.access_token;
+      tokenExp = Date.now() + (parseInt(response.expires_in, 10) * 1000);
+      LS.set("agenda_token", token);
+      LS.set("agenda_token_exp", tokenExp);
+      renderState();
+    }
+  });
